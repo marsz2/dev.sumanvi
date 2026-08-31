@@ -3,8 +3,8 @@
 // =====================================================
 
 // REPLACE THESE TWO VALUES
-const SUPABASE_URL = "";
-const SUPABASE_KEY = "";
+const SUPABASE_URL = "https://lovrnggbtczuedheajfn.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvdnJuZ2didGN6dWVkaGVhamZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxNzE4NTIsImV4cCI6MjEwMzc0Nzg1Mn0.yUjJN36eVR8fTKmVnJWRwqQ9Vk0zykCHYdiQcN4m7Tg";
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
