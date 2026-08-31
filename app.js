@@ -15,7 +15,7 @@ const categories = [
 const currentConfig = {
   whatsapp_number: "9511228208",
   // Replace this with your WhatsApp Community invite link.
-  whatsapp_community_url: "YOUR_WHATSAPP_COMMUNITY_LINK"
+  whatsapp_community_url: "https://chat.whatsapp.com/BiejjHkJqSaLBaowqVvtIO"
 };
 
 // =====================================================
@@ -129,62 +129,75 @@ function createWhatsAppCommunityPopup() {
 
   const popup = document.createElement("div");
   popup.id = "whatsappCommunityPopup";
-  popup.className = "fixed inset-0 z-[9999] hidden items-center justify-center bg-black/50 p-4";
+  popup.className = "fixed inset-0 z-[9999] hidden items-center justify-center bg-black/30 p-4 backdrop-blur-[2px]";
   popup.setAttribute("role", "dialog");
   popup.setAttribute("aria-modal", "true");
   popup.setAttribute("aria-labelledby", "whatsappCommunityTitle");
 
   popup.innerHTML = `
     <div id="whatsappCommunityDialog"
-      class="relative w-full max-w-md overflow-hidden rounded-[2rem] bg-white p-6 shadow-2xl dark:bg-slate-900">
+      class="relative w-full max-w-[320px] overflow-hidden rounded-[2rem] bg-white px-6 py-7 shadow-[0_25px_60px_rgba(16,36,61,0.16)] ring-1 ring-black/5 sm:max-w-[340px]">
+
       <button id="closeWhatsAppCommunityPopup"
         type="button"
-        aria-label="Close"
-        class="absolute right-4 top-4 rounded-full p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-white">
+        aria-label="Close WhatsApp Community popup"
+        class="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+      >
         <i data-lucide="x" class="h-5 w-5"></i>
       </button>
 
-      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-        <i data-lucide="message-circle" class="h-9 w-9"></i>
+      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_8px_20px_rgba(37,211,102,0.28)]">
+        <svg viewBox="0 0 32 32" class="h-8 w-8" aria-hidden="true" fill="none">
+          <path fill="currentColor" d="M16 3.5C9.1 3.5 3.5 8.9 3.5 15.6c0 2.2.6 4.3 1.8 6.1L3.7 28.5l7-1.5c1.6.8 3.4 1.2 5.3 1.2 6.9 0 12.5-5.4 12.5-12.1S22.9 3.5 16 3.5Z"/>
+          <path fill="#25D366" d="M16 6.2c5.4 0 9.8 4.2 9.8 9.4S21.4 25 16 25c-1.7 0-3.3-.4-4.7-1.1l-.5-.3-3.9.8.8-3.6-.3-.5c-1-1.4-1.5-3-1.5-4.7 0-5.2 4.4-9.4 9.8-9.4Z"/>
+          <path fill="white" d="M12.3 10.7c-.3-.1-.6-.1-.8.2l-1 1.1c-.3.3-.4.7-.2 1.1.7 1.7 2.9 4.5 5.2 5.7 1.2.6 2.1.9 2.7.9.4 0 .8-.2 1-.5l.9-1.1c.2-.3.2-.7-.1-.9l-1.7-1c-.3-.2-.7-.1-.9.2l-.6.7c-.1.1-.2.1-.4 0-.7-.4-2.1-1.5-2.9-2.7-.1-.2-.1-.3 0-.5l.5-.6c.2-.3.2-.6 0-.9l-.9-1.7c-.1-.1-.3-.2-.5-.2Z"/>
+        </svg>
       </div>
 
-      <div class="mt-5 text-center">
-        <p class="text-xs font-extrabold uppercase tracking-[0.2em] text-[#26a69a]">WhatsApp Community</p>
-        <h2 id="whatsappCommunityTitle" class="mt-2 text-2xl font-extrabold text-[#10243d] dark:text-white">
-          Join our WhatsApp Community
+      <div class="mt-4 text-center">
+        <h2 id="whatsappCommunityTitle" class="text-[21px] font-extrabold tracking-tight text-[#10243d]">
+          Join our community
         </h2>
-        <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-400">
-          Get product updates, offers, availability and B2B electrical marketplace updates directly on WhatsApp.
+        <p class="mt-1.5 text-[12px] leading-5 text-slate-500">
+          Get the best deals, daily updates &amp; exclusive offers
         </p>
       </div>
 
-      <div class="mt-6 grid gap-3">
+      <div class="mt-5">
         <a id="joinWhatsAppCommunityBtn"
           href="#"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3.5 text-sm font-extrabold text-white transition hover:bg-emerald-700">
-          <i data-lucide="message-circle" class="h-5 w-5"></i>
-          Join WhatsApp Community
+          class="flex w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-3 text-[13px] font-extrabold text-white shadow-[0_10px_20px_rgba(37,211,102,0.28)] transition hover:bg-[#1fbd5b] hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2"
+        >
+          <svg viewBox="0 0 32 32" class="h-5 w-5" aria-hidden="true" fill="none">
+            <path fill="currentColor" d="M16 3.5C9.1 3.5 3.5 8.9 3.5 15.6c0 2.2.6 4.3 1.8 6.1L3.7 28.5l7-1.5c1.6.8 3.4 1.2 5.3 1.2 6.9 0 12.5-5.4 12.5-12.1S22.9 3.5 16 3.5Z"/>
+            <path fill="#25D366" d="M16 6.2c5.4 0 9.8 4.2 9.8 9.4S21.4 25 16 25c-1.7 0-3.3-.4-4.7-1.1l-.5-.3-3.9.8.8-3.6-.3-.5c-1-1.4-1.5-3-1.5-4.7 0-5.2 4.4-9.4 9.8-9.4Z"/>
+            <path fill="white" d="M12.3 10.7c-.3-.1-.6-.1-.8.2l-1 1.1c-.3.3-.4.7-.2 1.1.7 1.7 2.9 4.5 5.2 5.7 1.2.6 2.1.9 2.7.9.4 0 .8-.2 1-.5l.9-1.1c.2-.3.2-.7-.1-.9l-1.7-1c-.3-.2-.7-.1-.9.2l-.6.7c-.1.1-.2.1-.4 0-.7-.4-2.1-1.5-2.9-2.7-.1-.2-.1-.3 0-.5l.5-.6c.2-.3.2-.6 0-.9l-.9-1.7c-.1-.1-.3-.2-.5-.2Z"/>
+          </svg>
+          Join WhatsApp Channel
         </a>
+      </div>
 
-        <button id="notNowWhatsAppCommunityBtn"
-          type="button"
-          class="w-full rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-extrabold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700">
-          Not Now
-        </button>
+      <div class="mt-4 text-center">
+        <div class="inline-flex items-center gap-1 rounded-full bg-[#eef8f2] px-3 py-1 text-[10px] font-semibold text-slate-600">
+          <span aria-hidden="true">🔒</span> free - no spam
+        </div>
+        <p class="mt-2 truncate rounded-full border border-[#d7ebe0] bg-[#f7fcf9] px-2.5 py-1 text-[7px] font-medium text-[#4a8b6d]" title="${getWhatsAppCommunityUrl()}">
+          ${getWhatsAppCommunityUrl()}
+        </p>
       </div>
     </div>
   `;
 
   document.body.appendChild(popup);
 
+  // Close when clicking anywhere outside the popup card.
   popup.addEventListener("click", event => {
     if (event.target === popup) closeWhatsAppCommunityPopup();
   });
 
   document.getElementById("closeWhatsAppCommunityPopup")?.addEventListener("click", closeWhatsAppCommunityPopup);
-  document.getElementById("notNowWhatsAppCommunityBtn")?.addEventListener("click", closeWhatsAppCommunityPopup);
 
   lucide.createIcons();
 }
@@ -193,7 +206,7 @@ function openWhatsAppCommunityPopup() {
   const communityUrl = getWhatsAppCommunityUrl();
 
   if (!communityUrl) {
-    showToast("WhatsApp Community link is not configured yet.");
+    console.warn("WhatsApp Community link is not configured.");
     return;
   }
 
@@ -233,6 +246,12 @@ function initWhatsAppCommunityPopup() {
     event.preventDefault();
     openWhatsAppCommunityPopup();
   });
+
+  // Automatically show the popup for every new page visit.
+  // A short delay lets the main page render first so the popup feels intentional.
+  setTimeout(() => {
+    openWhatsAppCommunityPopup();
+  }, 700);
 }
 
 // =====================================================
