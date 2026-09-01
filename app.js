@@ -5,8 +5,6 @@ const SUPABASE_URL = "https://lovrnggbtczuedheajfn.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvdnJuZ2didGN6dWVkaGVhamZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxNzE4NTIsImV4cCI6MjEwMzc0Nzg1Mn0.yUjJN36eVR8fTKmVnJWRwqQ9Vk0zykCHYdiQcN4m7Tg";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-
-
 const categories = [
   { name: "Lighting Solutions", icon: "lightbulb", desc: "LED Bulbs, Tube lights, Flood Lights" },
   { name: "Switches & Sockets", icon: "power", desc: "Modular switches, sockets, buttons" },
@@ -38,6 +36,33 @@ let carouselIndex = 0;
 // =====================================================
 // HELPERS
 // =====================================================
+function showToast(message, type = "success") {
+  let container = document.getElementById("toastContainer");
+
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "toastContainer";
+    container.className = "jsk-toast-container";
+    container.setAttribute("aria-live", "polite");
+    container.setAttribute("aria-atomic", "true");
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement("div");
+  toast.className = `jsk-toast jsk-toast-${type === "error" ? "error" : "success"}`;
+  toast.setAttribute("role", "status");
+  toast.textContent = String(message ?? "");
+
+  container.appendChild(toast);
+
+  requestAnimationFrame(() => toast.classList.add("is-visible"));
+
+  window.setTimeout(() => {
+    toast.classList.remove("is-visible");
+    window.setTimeout(() => toast.remove(), 250);
+  }, 3500);
+}
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
