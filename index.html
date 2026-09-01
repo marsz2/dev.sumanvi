@@ -866,8 +866,17 @@
           </div>
           <div class="grid gap-4 sm:grid-cols-2">
            <div>
-            <label for="prodSpecs" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Specifications (JSON format)</label>
-            <textarea id="prodSpecs" required class="w-full rounded-xl border border-slate-200 px-4 py-2 outline-none h-20 font-mono text-xs dark:bg-slate-700 dark:border-slate-600 dark:text-white" placeholder='{"Power": "12W", "Warranty": "1 Year"}'></textarea>
+            <div class="mb-1 flex items-center justify-between gap-3">
+             <label class="block text-sm font-bold text-slate-700 dark:text-slate-300">Specifications</label>
+             <button type="button" id="addSpecRowBtn" class="focus-ring inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#26a69a] text-lg font-extrabold text-white shadow-sm transition hover:bg-[#1f877d]" aria-label="Add specification row" title="Add specification">+</button>
+            </div>
+            <div id="specRows" class="grid gap-2">
+             <div class="spec-row grid grid-cols-[1fr_1.35fr] gap-2">
+              <input type="text" class="spec-label w-full rounded-xl border border-slate-200 px-4 py-2 outline-none dark:bg-slate-700 dark:border-slate-600 dark:text-white" placeholder="Label (e.g. Power)" required>
+              <input type="text" class="spec-value w-full rounded-xl border border-slate-200 px-4 py-2 outline-none dark:bg-slate-700 dark:border-slate-600 dark:text-white" placeholder="Specification (e.g. 12W)" required>
+             </div>
+            </div>
+            <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Add as many specification rows as you need.</p>
            </div>
            <div class="flex items-center">
             <input type="checkbox" id="prodFeatured" class="h-5 w-5 rounded border-slate-200 text-[#113967]">
