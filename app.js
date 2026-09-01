@@ -579,6 +579,77 @@ function initImagePreviews() {
 }
 
 // =====================================================
+// PRODUCT SPECIFICATION ROWS
+// =====================================================
+function createSpecificationRow(label = "", value = "") {
+  const row = document.createElement("div");
+  row.className = "spec-row grid grid-cols-[1fr_1.35fr] gap-2";
+  row.innerHTML = `
+    <input type="text" class="spec-label w-full rounded-xl border border-slate-200 px-4 py-2 outline-none dark:bg-slate-700 dark:border-slate-600 dark:text-white" placeholder="Label (e.g. Power)" required>
+    <input type="text" class="spec-value w-full rounded-xl border border-slate-200 px-4 py-2 outline-none dark:bg-slate-700 dark:border-slate-600 dark:text-white" placeholder="Specification (e.g. 12W)" required>
+  `;
+  row.querySelector(".spec-label").value = label;
+  row.querySelector(".spec-value").value = value;
+  return row;
+}
+
+function addSpecificationRow(label = "", value = "") {
+  const container = document.getElementById("specRows");
+  if (!container) return;
+  container.appendChild(createSpecificationRow(label, value));
+}
+
+function resetSpecificationRows() {
+  const container = document.getElementById("specRows");
+  if (!container) return;
+  container.innerHTML = "";
+  addSpecificationRow();
+}
+
+function getSpecificationsFromForm() {
+  const container = document.getElementById("specRows");
+  const specs = {};
+  if (!container) return specs;
+
+  container.querySelectorAll(".spec-row").forEach(row => {
+    const label = row.querySelector(".spec-label")?.value.trim();
+    const value = row.querySelector(".spec-value")?.value.trim();
+    if (label && value) specs[label] = value;
+  });
+
+  return specs;
+}
+
+function setSpecificationsInForm(specs) {
+  const container = document.getElementById("specRows");
+  if (!container) return;
+
+  container.innerHTML = "";
+  const entries = specs && typeof specs === "object" && !Array.isArray(specs)
+    ? Object.entries(specs)
+    : [];
+
+  if (!entries.length) {
+    addSpecificationRow();
+    return;
+  }
+
+  entries.forEach(([label, value]) => addSpecificationRow(label, value));
+}
+
+function initSpecificationRows() {
+  const addButton = document.getElementById("addSpecRowBtn");
+  if (addButton) {
+    addButton.addEventListener("click", () => addSpecificationRow());
+  }
+
+  const container = document.getElementById("specRows");
+  if (container && !container.querySelector(".spec-row")) {
+    addSpecificationRow();
+  }
+}
+
+// =====================================================
 // ADMIN CRUD
 // =====================================================
 async function saveProduct(event) {
@@ -592,20 +663,12 @@ async function saveProduct(event) {
   const price = Number(document.getElementById("prodPrice").value);
   const offer = document.getElementById("prodOffer").value;
   const description = document.getElementById("prodDesc").value.trim();
-  const specsRaw = document.getElementById("prodSpecs").value.trim();
+  const specs = getSpecificationsFromForm();
   const featured = document.getElementById("prodFeatured").checked;
   const file = document.getElementById("prodImageFile")?.files?.[0];
 
-  if (!name || !category || !Number.isFinite(price) || !offer || !description || !specsRaw) {
-    alert("Please fill all required product fields.");
-    return;
-  }
-
-  let specs;
-  try {
-    specs = JSON.parse(specsRaw);
-  } catch {
-    alert("Specifications must be valid JSON.");
+  if (!name || !category || !Number.isFinite(price) || !offer || !description || !Object.keys(specs).length) {
+    alert("Please fill all required product fields and add at least one specification.");
     return;
   }
 
@@ -657,6 +720,7 @@ async function saveProduct(event) {
     }
 
     document.getElementById("adminProductForm").reset();
+    resetSpecificationRows();
     document.getElementById("prodId").value = "";
     document.getElementById("productFormContainer").classList.add("hidden");
     showToast(id ? "Product updated successfully." : "Product added successfully.");
@@ -801,7 +865,7 @@ function editProduct(id) {
   document.getElementById("prodPrice").value = p.price;
   document.getElementById("prodOffer").value = p.offer || "";
   document.getElementById("prodDesc").value = p.desc || "";
-  document.getElementById("prodSpecs").value = JSON.stringify(p.specs || {}, null, 2);
+  setSpecificationsInForm(p.specs || {});
   document.getElementById("prodFeatured").checked = !!p.featured;
   document.getElementById("prodImageFile").value = "";
 
@@ -832,6 +896,7 @@ function editBlog(id) {
 function resetProductForm() {
   const form = document.getElementById("adminProductForm");
   if (form) form.reset();
+  resetSpecificationRows();
   document.getElementById("prodId").value = "";
   document.getElementById("productFormTitle").textContent = "Add Product";
   document.getElementById("productFormContainer").classList.add("hidden");
@@ -949,6 +1014,8 @@ function initDashboard() {
       document.getElementById("productFormContainer").scrollIntoView({ behavior: "smooth" });
     };
   }
+
+  initSpecificationRows();
 
   const productForm = document.getElementById("adminProductForm");
   if (productForm) productForm.addEventListener("submit", saveProduct);
