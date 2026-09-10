@@ -37,6 +37,15 @@ let carouselIndex = 0;
 // =====================================================
 // HELPERS
 // =====================================================
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function showToast(message, type = "success") {
   let toast = document.getElementById("sumanviToast");
   if (!toast) {
@@ -45,19 +54,10 @@ function showToast(message, type = "success") {
     toast.className = "fixed bottom-5 right-5 z-[10000] max-w-sm rounded-2xl px-5 py-4 text-sm font-extrabold text-white shadow-2xl transition-all duration-300";
     document.body.appendChild(toast);
   }
-  toast.textContent = String(message || "");
+  toast.textContent = message;
   toast.className = `fixed bottom-5 right-5 z-[10000] max-w-sm rounded-2xl px-5 py-4 text-sm font-extrabold text-white shadow-2xl transition-all duration-300 ${type === "error" ? "bg-rose-600" : "bg-[#113967]"}`;
   clearTimeout(window.__sumanviToastTimer);
-  window.__sumanviToastTimer = setTimeout(() => toast.remove(), 4000);
-}
-
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+  window.__sumanviToastTimer = setTimeout(() => toast.remove(), 4500);
 }
 
 function mapProduct(row) {
@@ -311,7 +311,7 @@ async function loadAdminData() {
 
   renderAdminProducts();
   renderAdminBlogs();
-  renderAdminInquiries(inquiriesResult.error ? [] : (inquiriesResult.data || []));
+  renderAdminInquiries(inquiriesResult);
   renderProducts();
   renderFeaturedCarousel();
   renderCategories();
@@ -802,26 +802,6 @@ function resetBlogForm() {
   document.getElementById("blogFormContainer").classList.add("hidden");
 }
 
-function renderAdminInquiries(rows) {
-  const tbody = document.getElementById("adminInquiryRows");
-  if (!tbody) return;
-  if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-500">No inquiries yet.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = rows.map(row => {
-    const date = row.created_at ? new Date(row.created_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "-";
-    return `<tr class="border-b border-slate-100 align-top dark:border-slate-800">
-      <td class="py-4 pr-4 text-sm whitespace-nowrap">${escapeHtml(date)}</td>
-      <td class="py-4 pr-4 text-sm font-extrabold">${escapeHtml(row.inquiry_type || "Inquiry")}</td>
-      <td class="py-4 pr-4 text-sm">${escapeHtml(row.product_name || "-")}</td>
-      <td class="py-4 pr-4 text-sm font-bold">${escapeHtml(row.name || "-")}</td>
-      <td class="py-4 pr-4 text-sm whitespace-nowrap">${escapeHtml(row.phone || "-")}</td>
-      <td class="py-4 text-sm min-w-[260px]">${escapeHtml(row.message || "-")}</td>
-    </tr>`;
-  }).join("");
-}
-
 function renderAdminProducts() {
   const tbody = document.getElementById("adminProductRows");
   if (!tbody) return;
@@ -951,6 +931,11 @@ function initDashboard() {
 
   const cancelBlogBtn = document.getElementById("cancelBlogBtn");
   if (cancelBlogBtn) cancelBlogBtn.onclick = resetBlogForm;
+
+  document.getElementById("refreshInquiriesBtn")?.addEventListener("click", async () => {
+    await loadAdminData();
+    showToast("Inquiries refreshed.");
+  });
 
   const fieldForm = document.getElementById("fieldForm");
 
@@ -1120,9 +1105,11 @@ function createProductCard(product, isCarousel = false) {
           <p class="rounded-full bg-[#26a69a]/15 px-3 py-1 text-xs font-extrabold text-[#0f766e] dark:bg-[#26a69a]/20 dark:text-[#2dd4bf]">${daysLeft(product.offer)} days left</p>
         </div>
         <div class="card-actions mt-4">
-          <button class="contact-whatsapp whatsapp-btn focus-ring rounded-2xl w-full px-3 py-3 text-sm font-extrabold text-white" data-id="${product.id}" type="button">WhatsApp Inquiry</button>
-          <button class="request-call-btn focus-ring w-full rounded-2xl bg-[#26a69a] px-3 py-3 text-sm font-extrabold text-white hover:bg-[#1f877d]" data-id="${product.id}" type="button">Request Call</button>
-          <button class="details-btn focus-ring w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-extrabold text-slate-700 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:hover:bg-slate-700" data-id="${product.id}" type="button">View Details</button>
+          <div class="btn-row">
+            <button class="contact-whatsapp whatsapp-btn focus-ring rounded-2xl px-3 py-3 text-sm font-extrabold text-white" data-id="${product.id}" type="button">WhatsApp Inquiry</button>
+            <button class="details-btn focus-ring rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-extrabold text-slate-700 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:hover:bg-slate-700" data-id="${product.id}" type="button">View Details</button>
+          </div>
+          <button class="request-call-btn call-btn focus-ring rounded-2xl w-full px-3 py-3 text-sm font-extrabold text-white" data-id="${product.id}" type="button">Request Call</button>
         </div>
       </div>
     </article>
@@ -1230,6 +1217,9 @@ function attachProductActions() {
   });
 
   attachContactButtons();
+  document.querySelectorAll(".request-call-btn").forEach(btn => {
+    btn.onclick = () => openRequestCallModal(btn.dataset.id);
+  });
 }
 
 function renderDetails() {
@@ -1517,69 +1507,93 @@ function initSearch() {
   }
 }
 
-function openRequestCallModal(product) {
+async function saveInquiry({ inquiryType, productId = null, productName = "", name, phone, requirement }) {
+  const payload = {
+    inquiry_type: inquiryType,
+    product_id: productId ? Number(productId) : null,
+    product_name: productName || null,
+    name: String(name || "").trim(),
+    phone: String(phone || "").trim(),
+    requirement: String(requirement || "").trim()
+  };
+
+  if (!payload.name || !payload.phone) throw new Error("Name and phone are required.");
+
+  const { error } = await supabaseClient.from("inquiries").insert(payload);
+  if (error) throw error;
+}
+
+function openRequestCallModal(productId) {
+  const product = allProducts.find(p => String(p.id) === String(productId));
+  if (!product) return;
   const modal = document.getElementById("requestCallModal");
-  if (!modal) return;
-  selectedProduct = product || selectedProduct;
   const label = document.getElementById("requestCallProduct");
-  if (label) label.textContent = product ? `Product: ${product.name}` : "";
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
-  document.getElementById("requestCallName")?.focus();
-  if (window.lucide) lucide.createIcons();
+  if (label) label.textContent = `Product: ${product.name}`;
+  modal?.classList.remove("hidden");
+  modal?.classList.add("flex");
+  document.body.classList.add("overflow-hidden");
+  if (modal) modal.dataset.productId = String(product.id);
 }
 
 function closeRequestCallModal() {
   const modal = document.getElementById("requestCallModal");
-  if (!modal) return;
-  modal.classList.add("hidden");
-  modal.classList.remove("flex");
+  modal?.classList.add("hidden");
+  modal?.classList.remove("flex");
+  document.body.classList.remove("overflow-hidden");
 }
 
 function initRequestCall() {
-  document.addEventListener("click", event => {
-    const btn = event.target.closest(".request-call-btn");
-    if (btn) {
-      event.preventDefault();
-      event.stopPropagation();
-      const product = allProducts.find(p => String(p.id) === String(btn.dataset.id));
-      if (product) openRequestCallModal(product);
-      return;
-    }
-    if (event.target.closest("#closeRequestCallModal")) closeRequestCallModal();
-  });
-
   const modal = document.getElementById("requestCallModal");
-  if (modal) modal.addEventListener("click", event => { if (event.target === modal) closeRequestCallModal(); });
-  document.addEventListener("keydown", event => { if (event.key === "Escape") closeRequestCallModal(); });
-
   const form = document.getElementById("requestCallForm");
-  if (form) form.onsubmit = async event => {
-    event.preventDefault();
+  if (!modal || !form) return;
+  document.getElementById("closeRequestCallModal")?.addEventListener("click", closeRequestCallModal);
+  modal.addEventListener("click", e => { if (e.target === modal) closeRequestCallModal(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeRequestCallModal(); });
+  form.onsubmit = async e => {
+    e.preventDefault();
+    const productId = modal.dataset.productId;
+    const product = allProducts.find(p => String(p.id) === String(productId));
     const button = document.getElementById("requestCallSubmit");
-    if (button) button.disabled = true;
+    if (button) { button.disabled = true; button.textContent = "Submitting..."; }
     try {
-      const name = document.getElementById("requestCallName")?.value.trim();
-      const phone = document.getElementById("requestCallPhone")?.value.trim();
-      const message = document.getElementById("requestCallMessage")?.value.trim();
-      const product = selectedProduct;
-      if (!name || !phone) { showToast("Please enter your name and phone number.", "error"); return; }
-      const { error } = await supabaseClient.from("inquiries").insert({
-        inquiry_type: "Request Call",
-        product_id: product?.id || null,
-        product_name: product?.name || null,
-        name, phone, message: message || null
+      await saveInquiry({
+        inquiryType: "Request Call",
+        productId,
+        productName: product?.name || "",
+        name: document.getElementById("requestCallName")?.value,
+        phone: document.getElementById("requestCallPhone")?.value,
+        requirement: document.getElementById("requestCallMessage")?.value
       });
-      if (error) throw error;
       form.reset();
       closeRequestCallModal();
       showToast("Request Call submitted successfully.");
-      if (isAdmin) await loadAdminData();
     } catch (error) {
       console.error("Request Call submission error:", error);
       showToast(error.message || "Unable to submit Request Call.", "error");
-    } finally { if (button) button.disabled = false; }
+    } finally {
+      if (button) { button.disabled = false; button.textContent = "Request Call"; }
+    }
   };
+}
+
+function renderAdminInquiries(result) {
+  const tbody = document.getElementById("adminInquiryRows");
+  if (!tbody) return;
+  if (result?.error) {
+    console.error("Inquiry loading error:", result.error);
+    tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-rose-600 font-bold">${escapeHtml(result.error.message)}</td></tr>`;
+    return;
+  }
+  const rows = result?.data || [];
+  tbody.innerHTML = rows.length ? rows.map(item => `
+    <tr class="border-b border-slate-200 dark:border-slate-700 align-top">
+      <td class="py-3 text-sm dark:text-slate-300">${escapeHtml(new Date(item.created_at).toLocaleString("en-IN"))}</td>
+      <td class="py-3 text-sm font-bold dark:text-white">${escapeHtml(item.inquiry_type || "Inquiry")}</td>
+      <td class="py-3 text-sm dark:text-slate-300">${escapeHtml(item.product_name || "-")}</td>
+      <td class="py-3 text-sm dark:text-slate-300">${escapeHtml(item.name || "-")}</td>
+      <td class="py-3 text-sm dark:text-slate-300">${escapeHtml(item.phone || "-")}</td>
+      <td class="py-3 text-sm dark:text-slate-300">${escapeHtml(item.requirement || "-")}</td>
+    </tr>`).join("") : `<tr><td colspan="6" class="py-8 text-center text-slate-500">No inquiries yet.</td></tr>`;
 }
 
 function initInquiry() {
@@ -1588,27 +1602,28 @@ function initInquiry() {
   inquiryForm.onsubmit = async e => {
     e.preventDefault();
     const button = inquiryForm.querySelector('button[type="submit"]');
-    if (button) button.disabled = true;
+    if (button) { button.disabled = true; button.textContent = "Submitting..."; }
     try {
-      const name = document.getElementById("nameInput")?.value.trim();
-      const phone = document.getElementById("phoneInput")?.value.trim();
-      const message = document.getElementById("messageInput")?.value.trim();
-      if (!name || !phone || !message) { showToast("Please fill all inquiry fields.", "error"); return; }
-      const { error } = await supabaseClient.from("inquiries").insert({
-        inquiry_type: "Send Inquiry", product_id: null, product_name: null, name, phone, message
+      await saveInquiry({
+        inquiryType: "Send Inquiry",
+        name: document.getElementById("nameInput")?.value,
+        phone: document.getElementById("phoneInput")?.value,
+        requirement: document.getElementById("messageInput")?.value
       });
-      if (error) throw error;
       const successBanner = document.getElementById("formSuccess");
-      if (successBanner) { successBanner.classList.remove("hidden"); setTimeout(() => successBanner.classList.add("hidden"), 6000); }
+      successBanner?.classList.remove("hidden");
       inquiryForm.reset();
       showToast("Inquiry submitted successfully.");
-      if (isAdmin) await loadAdminData();
+      setTimeout(() => successBanner?.classList.add("hidden"), 6000);
     } catch (error) {
       console.error("Inquiry submission error:", error);
       showToast(error.message || "Unable to submit inquiry.", "error");
-    } finally { if (button) button.disabled = false; }
+    } finally {
+      if (button) { button.disabled = false; button.textContent = "Send Inquiry"; }
+    }
   };
 }
+
 
 // =====================================================
 // STARTUP
@@ -1651,13 +1666,8 @@ async function initApp() {
   }
 
   try {
-    initRequestCall();
-  } catch (error) {
-    console.error("Request Call initialization error:", error);
-  }
-
-  try {
     initInquiry();
+    initRequestCall();
   } catch (error) {
     console.error("Inquiry initialization error:", error);
   }
